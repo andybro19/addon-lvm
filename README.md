@@ -26,7 +26,7 @@ More info:
 
 ## Compatibility
 
-This add-on is compatible with OpenNebula >= 4.6.
+This add-on is compatible with OpenNebula >= 6.0.
 
 Requirements
 ------------
@@ -39,7 +39,7 @@ Requirements
 
 LVM must be available in the Hosts. The `oneadmin` user should be able to execute several LVM related commands with sudo passwordlessly.
 
--   Password-less sudo permission for: `lvremove`, `lvcreate`, `lvs`, `vgdisplay` and `dd`.
+-   Password-less sudo permission for: `lvremove`, `lvcreate`, `lvs`, `vgdisplay`, `mkfs.ext4`, `mkfs.ext3`, `mkfs.ext2`, `mkfs.xfs` and `dd`.
 -   LVM2
 -   `oneadmin` needs to belong to the `disk` group (for KVM).
 
@@ -71,24 +71,36 @@ The specific attributes for this datastore driver are listed in the following ta
 </thead>
 <tbody>
 <tr class="odd">
+<td><code>TYPE</code></td>
+<td>Must be <code>IMAGE_DS</code></td>
+</tr>
+<tr class="even">
 <td><code>DS_MAD</code></td>
 <td>Must be <code>lvm</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>TM_MAD</code></td>
 <td>Must be <code>lvm</code></td>
 </tr>
-<tr class="odd">
-<td><code>DISK_TYPE</code></td>
-<td>Must be <code>block</code></td>
-</tr>
 <tr class="even">
+<td><code>DISK_TYPE</code></td>
+<td>Must be <code>BLOCK</code></td>
+</tr>
+<tr class="odd">
 <td><code>VG_NAME</code></td>
 <td>The LVM volume group name. Defaults to <code>vg-one</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>BRIDGE_LIST</code></td>
 <td><strong>Mandatory</strong> space separated list of LVM frontends.</td>
+</tr>
+<tr class="odd">
+<td><code>MKFS_EXT_OPTS</code></td>
+<td><strong>Optional</strong> mkfs.ext command line arguments. E.g. <code>-b 4096 -E stride=128,stripe-width=256</code></td>
+</tr>
+<tr class="even">
+<td><code>MKFS_XFS_OPTS</code></td>
+<td><strong>Optional</strong> mkfs.xfs command line arguments. E.g. <code>-b size=4096 -d su=512K,sw=2</code></td>
 </tr>
 </tbody>
 </table>
@@ -98,8 +110,10 @@ For example, the following examples illustrates the creation of an LVM datastore
 ``` sourceCode
 > cat ds.conf
 NAME = production
+TYPE = IMAGE_DS
 DS_MAD = lvm
 TM_MAD = lvm
+DISK_TYPE = BLOCK
 VG_NAME = vg-one
 BRIDGE_LIST = "host01 host02"
 
@@ -107,10 +121,11 @@ BRIDGE_LIST = "host01 host02"
 ID: 100
 
 > onedatastore list
-  ID NAME            CLUSTER  IMAGES TYPE   TM
-   0 system          none     0      fs     shared
-   1 default         none     3      fs     shared
- 100 production      none     0      lvm  shared
+  ID NAME            CLUSTERS IMAGES TYPE   DS     TM
+
+ 100 production      0        0      img    lvm    lvm
+   1 default         0        0      img    fs     ssh
+   0 system          0        0      sys    -      ssh
 ```
 
 The DS and TM MAD can be changed later using the `onedatastore update` command. You can check more details of the datastore by issuing the `onedatastore show` command.
@@ -125,7 +140,7 @@ After creating a new datastore the LN\_TARGET and CLONE\_TARGET parameters will 
 
 The hosts must have LVM2 and have the Volume-Group used in the `VG_NAME` attributed of the datastore template. CLVM must also be installed and active accross all the hosts that use this datastore.
 
-It's also required to have password-less sudo permission for: `lvremove`, `lvcreate`, `lvs` and `dd`.
+It's also required to have password-less sudo permission for: `lvremove`, `lvcreate`, `lvs`, `vgdisplay`, `mkfs.ext4`, `mkfs.ext3`, `mkfs.ext2`, `mkfs.xfs` and `dd`.
 
 Tuning & Extending
 ------------------
