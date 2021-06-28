@@ -65,10 +65,16 @@ fi
 
 SAFE_DIRS=""
 
-SRC_HOST=`echo $SRC|cut -d: -f1`
-SRC_PATH=`echo $SRC|awk -F. '{print $NF}'`
+SRC_HOST=$(echo $SRC|cut -d: -f1)
+SRC_PATH=$(echo $SRC|cut -d: -f2)
+VG_SRC=$(echo $SRC_PATH|cut -d. -f1)
 LV_SRC=$(echo $SRC_PATH|cut -d. -f2)
-DEV_SRC="/dev/$VG_NAME/$LV_SRC"
+DEV_SRC="/dev/$VG_SRC/$LV_SRC"
+
+if [ ! "${SRC_HOST}" = "${DST_HOST}" ]; then
+    error_message "Cannot clone image from ${SRC_HOST} to ${DST_HOST}"
+    exit -1
+fi
 
 set_up_datastore "$BASE_PATH" "$RESTRICTED_DIRS" "$SAFE_DIRS"
 
@@ -78,7 +84,7 @@ DEV="/dev/$VG_NAME/$LV_NAME"
 
 CLONE_CMD=$(cat <<EOF
     set -e
-    $SUDO $LVCREATE -L${SIZE}M ${VG_NAME} -n ${LV_NAME}
+    $SUDO $LVCREATE --wipesignatures n -L${SIZE}M ${VG_NAME} -n ${LV_NAME}
     $SUDO $DD if=$DEV_SRC of=$DEV bs=64k
 EOF
 )

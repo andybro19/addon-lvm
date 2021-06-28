@@ -60,8 +60,8 @@ DUMP_CMD=$(cat <<EOF
     DEV=\$(readlink $SRC_PATH)
     SIZE=\$($SUDO $LVS \$DEV --noheadings --nosuffix --units m -o lv_size \
             | tr -d ' ')
-    $SUDO $LVCREATE -L\${SIZE}M ${VG_NAME} -n ${LV_NAME}
-    $SUDO $DD if="\${DEV}" of="${TARGET_DEV}"
+    $SUDO $LVCREATE --wipesignatures n -L\${SIZE}M ${VG_NAME} -n ${LV_NAME}
+    $SUDO $DD if="\${DEV}" of="${TARGET_DEV}" bs=64k
 EOF
 )
 
