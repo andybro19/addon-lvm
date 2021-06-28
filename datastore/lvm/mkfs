@@ -51,16 +51,22 @@ done < <($XPATH     /DS_DRIVER_ACTION_DATA/DATASTORE/BASE_PATH \
                     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/SAFE_DIRS \
                     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/BRIDGE_LIST \
                     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/VG_NAME \
-                    /DS_DRIVER_ACTION_DATA/IMAGE/FSTYPE \
-                    /DS_DRIVER_ACTION_DATA/IMAGE/SIZE)
+                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/MKFS_EXT_OPTS \
+                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/MKFS_XFS_OPTS \
+                    /DS_DRIVER_ACTION_DATA/IMAGE/FS \
+                    /DS_DRIVER_ACTION_DATA/IMAGE/SIZE \
+                    /DS_DRIVER_ACTION_DATA/IMAGE/FORMAT)
 
 BASE_PATH="${XPATH_ELEMENTS[j++]}"
 RESTRICTED_DIRS="${XPATH_ELEMENTS[j++]}"
 SAFE_DIRS="${XPATH_ELEMENTS[j++]}"
 BRIDGE_LIST="${XPATH_ELEMENTS[j++]}"
 VG_NAME="${XPATH_ELEMENTS[j++]:-$VG_NAME}"
-FSTYPE="${XPATH_ELEMENTS[j++]}"
+MKFS_EXT_OPTS="${XPATH_ELEMENTS[j++]}"
+MKFS_XFS_OPTS="${XPATH_ELEMENTS[j++]}"
+FS="${XPATH_ELEMENTS[j++]}"
 SIZE="${XPATH_ELEMENTS[j++]}"
+FORMAT="${XPATH_ELEMENTS[j++]}"
 
 DST_HOST=`get_destination_host $ID`
 
@@ -74,11 +80,20 @@ set_up_datastore "$BASE_PATH" "$RESTRICTED_DIRS" "$SAFE_DIRS"
 LV_NAME="lv-one-${ID}"
 LVM_SOURCE="$DST_HOST:$VG_NAME.$LV_NAME"
 DEV="/dev/$VG_NAME/$LV_NAME"
-MKFS_COMMAND=$(mkfs_command "$DEV" "$FSTYPE")
+MKFS_COMMAND=""
+if [ "${FS}" = "ext4" ] || [ "${FS}" = "ext3" ] || [ "${FS}" = "ext2" ] || [ "${FS}" = "xfs" ]; then
+    if [ "${FS}" = "xfs" ] && [ -n "${MKFS_XFS_OPTS}" ]; then
+        MKFS_COMMAND="mkfs.xfs ${MKFS_XFS_OPTS} ${DEV}"
+    elif [ ! "${FS}" = "xfs" ] && [ -n "${MKFS_EXT_OPTS}" ]; then
+        MKFS_COMMAND="mkfs.${FS} ${MKFS_EXT_OPTS} ${DEV}"
+    else
+        MKFS_COMMAND="mkfs.${FS} ${DEV}"
+    fi
+fi
 
 REGISTER_CMD=$(cat <<EOF
     set -e
-    $SUDO $LVCREATE -L${SIZE}M ${VG_NAME} -n ${LV_NAME}
+    $SUDO $LVCREATE --wipesignatures n -L${SIZE}M ${VG_NAME} -n ${LV_NAME}
     if [ -n "$MKFS_COMMAND" ]; then
         $SUDO $MKFS_COMMAND
     fi
@@ -87,7 +102,7 @@ EOF
 
 # ------------ Image to save_as disk, no need to create a FS ------------
 
-if [ "$FSTYPE" = "save_as" ]; then
+if [ "${FORMAT}" = "save_as" ]; then
     echo "$LVM_SOURCE"
     exit 0
 fi
