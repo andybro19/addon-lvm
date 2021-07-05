@@ -39,7 +39,7 @@ Requirements
 
 LVM must be available in the Hosts. The `oneadmin` user should be able to execute several LVM related commands with sudo passwordlessly.
 
--   Password-less sudo permission for: `lvremove`, `lvcreate`, `lvs`, `vgdisplay`, `mkfs.ext4`, `mkfs.ext3`, `mkfs.ext2`, `mkfs.xfs` and `dd`.
+-   Password-less sudo permission for: `lvremove`, `lvcreate`, `lvs`, `vgdisplay`.
 -   LVM2
 -   `oneadmin` needs to belong to the `disk` group (for KVM).
 
@@ -140,7 +140,7 @@ After creating a new datastore the LN\_TARGET and CLONE\_TARGET parameters will 
 
 The hosts must have LVM2 and have the Volume-Group used in the `VG_NAME` attributed of the datastore template. CLVM must also be installed and active accross all the hosts that use this datastore.
 
-It's also required to have password-less sudo permission for: `lvremove`, `lvcreate`, `lvs`, `vgdisplay`, `mkfs.ext4`, `mkfs.ext3`, `mkfs.ext2`, `mkfs.xfs` and `dd`.
+It's also required to have password-less sudo permission for: `lvremove`, `lvcreate`, `lvs`, `vgdisplay`.
 
 Tuning & Extending
 ------------------
