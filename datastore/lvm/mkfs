@@ -94,12 +94,17 @@ fi
 REGISTER_CMD=$(cat <<EOF
     set -e
     export PATH="/usr/sbin:/sbin:\${PATH}"
-    $SUDO $LVCREATE --wipesignatures n -L${SIZE}M ${VG_NAME} -n ${LV_NAME}
-    if [ -n "$MKFS_COMMAND" ]; then
-        $MKFS_COMMAND
-    fi
+    ${SUDO} ${LVCREATE} --wipesignatures n -L${SIZE}M ${VG_NAME} -n ${LV_NAME}
 EOF
 )
+
+if [ -n "$MKFS_COMMAND" ]; then
+REGISTER_CMD=$(cat <<EOF
+    ${REGISTER_CMD}
+    ${MKFS_COMMAND}
+EOF
+)
+fi
 
 # ------------ Image to save_as disk, no need to create a FS ------------
 
