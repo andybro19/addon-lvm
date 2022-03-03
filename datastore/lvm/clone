@@ -84,7 +84,7 @@ DEV="/dev/$VG_NAME/$LV_NAME"
 
 CLONE_CMD=$(cat <<EOF
     set -e
-    $SUDO $LVCREATE --wipesignatures n -L${SIZE}M ${VG_NAME} -n ${LV_NAME}
+    $SUDO $LVCREATE --wipesignatures y --zero y --yes -L${SIZE}M ${VG_NAME} -n ${LV_NAME}
     $DD if=$DEV_SRC of=$DEV bs=64k
 EOF
 )

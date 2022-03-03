@@ -94,7 +94,7 @@ fi
 REGISTER_CMD=$(cat <<EOF
     set -e
     export PATH="/usr/sbin:/sbin:\${PATH}"
-    ${SUDO} ${LVCREATE} --wipesignatures n -L${SIZE}M ${VG_NAME} -n ${LV_NAME}
+    ${SUDO} ${LVCREATE} --wipesignatures y --zero y --yes -L${SIZE}M ${VG_NAME} -n ${LV_NAME}
 EOF
 )
 
