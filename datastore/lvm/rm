@@ -45,10 +45,12 @@ unset i j XPATH_ELEMENTS
 while IFS= read -r -d '' element; do
     XPATH_ELEMENTS[i++]="$element"
 done < <($XPATH     /DS_DRIVER_ACTION_DATA/IMAGE/SOURCE \
-                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/BRIDGE_LIST)
+                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/BRIDGE_LIST \
+                    /DS_DRIVER_ACTION_DATA/IMAGE/SIZE)
 
 SRC="${XPATH_ELEMENTS[j++]}"
 BRIDGE_LIST="${XPATH_ELEMENTS[j++]}"
+SIZE="${XPATH_ELEMENTS[j++]}"
 
 DST_HOST=`get_destination_host $ID`
 
@@ -63,6 +65,7 @@ VG_NAME=`echo $TARGET|$AWK -F. '{print $(NF-1)}'`
 DEV="/dev/$VG_NAME/$LV_NAME"
 
 RM_COMMAND=$(cat <<EOF
+    $DD if=/dev/zero of="${DEV}" bs=1M count="${SIZE}"
     $SUDO $LVREMOVE -f $VG_NAME/$LV_NAME
 EOF
 )
